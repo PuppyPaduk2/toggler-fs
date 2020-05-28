@@ -2,8 +2,13 @@
   "name": "toggler-fs",
   "version": "0.0.0",
   "license": "MIT",
+  "main": "./src/index.js",
+  "bin": {
+    "toggler-fs": "./src/cli.js"
+  },
   "dependencies": {
-    "commander": "^5.1.0"
+    "commander": "^5.1.0",
+    "object-hash": "^2.0.3"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
