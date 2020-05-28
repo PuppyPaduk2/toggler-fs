@@ -1,6 +1,20 @@
 {
   "name": "toggler-fs",
   "version": "0.0.0",
-  "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^5.1.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.1.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "husky": "^4.2.5",
+    "prettier": "^2.0.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn eslint ./src"
+    }
+  }
 }
