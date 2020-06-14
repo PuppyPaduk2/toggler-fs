@@ -4,10 +4,11 @@ const { program } = require("commander");
 const path = require("path");
 const fs = require("fs");
 const objectHash = require("object-hash");
+const { timeCommand } = require("./lib/time");
 
 require("colors");
 
-const { version, name } = require("../package.json");
+const { version } = require("../package.json");
 
 // Main programm
 program.version(version);
@@ -15,49 +16,37 @@ program.version(version);
 // Command 'add'
 const add = program.command("add <files>");
 
-add.action((...args) => {
-  commandAdd(...args);
-});
+add.action((...args) => timeCommand("add", () => commandAdd(...args)));
 
 // Command 'remove'
 const remove = program.command("remove <hash-files>");
 
-remove.action((...args) => commandRemove(...args));
+remove.action((...args) => timeCommand("remove", () => commandRemove(...args)));
 
 // Command 'show'
 const show = program.command("show");
 
-show.action((...args) => {
-  commandShow(...args);
-});
+show.action((...args) => timeCommand("show", () => commandShow(...args)));
 
 // Command 'hide'
 const hide = program.command("hide");
 
-hide.action((...args) => {
-  commandHide(...args);
-});
+hide.action((...args) => timeCommand("hide", () => commandHide(...args)));
 
 // Command 'clear'
 const clear = program.command("clear");
 
-clear.action((...args) => {
-  commandClear(...args);
-});
+clear.action((...args) => timeCommand("clear", () => commandClear(...args)));
 
 // Command 'list'
 const list = program.command("list");
 
-list.action((...args) => commandList(...args));
+list.action((...args) => timeCommand("list", () => commandList(...args)));
 
 program.parse(process.argv);
 
 // Commands
 async function commandAdd(_, command) {
-  const title = "✨ toggler-fs add done";
-
-  console.time(title);
-
   const pathStore = getPathStore();
   const files = command.args;
 
@@ -83,76 +72,52 @@ async function commandAdd(_, command) {
 
     console.log("");
   });
-
-  console.timeEnd(title);
 }
 
 async function commandRemove(_, command) {
-  return timeCommand("remove", async () => {
-    const { pathStore } = await getStore();
-    const args = command.args || [];
+  const { pathStore } = await getStore();
+  const args = command.args || [];
 
-    const checkPath = async (_pathFile) => {
-      const pathFile = _pathFile.replace(pathStore, "");
+  const checkPath = async (_pathFile) => {
+    const pathFile = _pathFile.replace(pathStore, "");
 
-      if (pathFile.length) {
-        const hashFile = objectHash(pathFile);
+    if (pathFile.length) {
+      const hashFile = objectHash(pathFile);
 
-        if (args.includes(hashFile)) {
-          await removePath(_pathFile);
-        }
+      if (args.includes(hashFile)) {
+        await removePath(_pathFile);
       }
-    };
+    }
+  };
 
-    await eachFile(pathStore, checkPath, checkPath);
-  });
+  await eachFile(pathStore, checkPath, checkPath);
 }
 
 async function commandShow() {
-  const title = "✨ toggler-fs show done";
-
-  console.time(title);
-
   await copyPath(getPathStore(), process.cwd());
-
-  console.timeEnd(title);
 }
 
 async function commandHide() {
-  const title = "✨ toggler-fs hide done";
-
-  console.time(title);
-
   hidePath(getPathStore(), process.cwd());
-
-  console.timeEnd(title);
 }
 
 async function commandClear() {
-  const title = "✨ toggler-fs clear done";
-
-  console.time(title);
-
   removePath(getPathStore(), process.cwd());
-
-  console.timeEnd(title);
 }
 
 async function commandList() {
-  return timeCommand("list", async () => {
-    const { pathStore } = await getStore();
+  const { pathStore } = await getStore();
 
-    const logPath = ({ pre = "", post = "" }) => (_pathFile) => {
-      const pathFile = _pathFile.replace(pathStore, "");
+  const logPath = ({ pre = "", post = "" }) => (_pathFile) => {
+    const pathFile = _pathFile.replace(pathStore, "");
 
-      if (pathFile.length) {
-        const hashFile = objectHash(pathFile);
-        console.log(`${pre}${hashFile.cyan} ${pathFile}${post}`);
-      }
-    };
+    if (pathFile.length) {
+      const hashFile = objectHash(pathFile);
+      console.log(`${pre}${hashFile.cyan} ${pathFile}${post}`);
+    }
+  };
 
-    await eachFile(pathStore, logPath({ pre: "📄 " }), logPath({ pre: "📁 " }));
-  });
+  await eachFile(pathStore, logPath({ pre: "📄 " }), logPath({ pre: "📁 " }));
 }
 
 // Addded methods
@@ -289,27 +254,6 @@ function nodePromise(callback, ...args) {
 async function asyncForEach(arr, callback) {
   for (let index = 0; index < arr.length; index += 1) {
     await callback(arr[index], index, arr);
-  }
-}
-
-async function time(key, cb) {
-  console.time(key);
-
-  const result = await cb();
-
-  console.timeEnd(key);
-
-  return result;
-}
-
-async function timeCommand(command, cb) {
-  const key = `✨ ${name} ${command} done`;
-
-  try {
-    return await time(key, cb);
-  } catch (error) {
-    console.log(error);
-    console.log(`❌ ${name} ${command} fail`);
   }
 }
 
