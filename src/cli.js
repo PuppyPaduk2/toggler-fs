@@ -5,7 +5,9 @@ const path = require("path");
 const fs = require("fs");
 const objectHash = require("object-hash");
 
-const { version } = require("../package.json");
+require("colors");
+
+const { version, name } = require("../package.json");
 
 // Main programm
 program.version(version);
@@ -16,6 +18,9 @@ const add = program.command("add <files>");
 add.action((...args) => {
   commandAdd(...args);
 });
+
+// Command 'remove'
+// Code...
 
 // Command 'show'
 const show = program.command("show");
@@ -31,12 +36,17 @@ hide.action((...args) => {
   commandHide(...args);
 });
 
-// Command Remove
+// Command 'clear'
 const clear = program.command("clear");
 
 clear.action((...args) => {
   commandClear(...args);
 });
+
+// Command 'list'
+const list = program.command("list");
+
+list.action((...args) => commandList(...args));
 
 program.parse(process.argv);
 
@@ -105,6 +115,24 @@ async function commandClear() {
   console.timeEnd(title);
 }
 
+async function commandList() {
+  return timeCommand("list", async () => {
+    const pathStore = getPathStore();
+
+    const logPath = ({ pre = "", post = "" }) => (_pathFile) => {
+      const pathFile = _pathFile.replace(pathStore, "");
+
+      if (pathFile.length) {
+        const hashFile = objectHash(pathFile);
+
+        console.log(`${pre}${hashFile.cyan} ${pathFile}${post}`);
+      }
+    };
+
+    await eachFile(pathStore, logPath({ pre: "📄 " }), logPath({ pre: "📁 " }));
+  });
+}
+
 // Addded methods
 function getPathStore() {
   const pathRootStore = path.resolve(__dirname, "../.store");
@@ -123,6 +151,28 @@ async function mkdir(path) {
   } catch (error) {
     return await nodePromise(fs.mkdir, path, { recursive: true });
   }
+}
+
+async function eachFile(
+  pathValue,
+  callbackFile = () => {},
+  callbackDir = () => {},
+) {
+  const fromStat = await nodePromise(fs.stat, pathValue);
+
+  if (fromStat.isDirectory()) {
+    const dirPaths = await nodePromise(fs.readdir, pathValue);
+
+    callbackDir(pathValue);
+
+    await asyncForEach(dirPaths, async (item) => {
+      await eachFile(path.resolve(pathValue, item), callbackFile, callbackDir);
+    });
+
+    return;
+  }
+
+  await callbackFile(pathValue);
 }
 
 async function copyFile(pathFrom, pathTo) {
@@ -215,4 +265,20 @@ async function asyncForEach(arr, callback) {
   for (let index = 0; index < arr.length; index += 1) {
     await callback(arr[index], index, arr);
   }
+}
+
+async function time(key, cb) {
+  console.time(key);
+
+  const result = await cb();
+
+  console.timeEnd(key);
+
+  return result;
+}
+
+async function timeCommand(command, cb) {
+  const key = `✨ ${name} ${command} done`;
+
+  return time(key, cb);
 }
