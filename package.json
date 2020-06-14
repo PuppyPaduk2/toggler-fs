@@ -1,6 +1,8 @@
 {
   "name": "toggler-fs",
   "version": "0.0.0",
+  "repository": "git@github.com:EvgenyiFedotov/toggler-fs.git",
+  "author": "e.fedotov <fedotov1290@gmail.com>",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
