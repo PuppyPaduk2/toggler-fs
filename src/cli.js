@@ -20,7 +20,9 @@ add.action((...args) => {
 });
 
 // Command 'remove'
-// Code...
+const remove = program.command("remove <hash-files>");
+
+remove.action((...args) => commandRemove(...args));
 
 // Command 'show'
 const show = program.command("show");
@@ -85,6 +87,27 @@ async function commandAdd(_, command) {
   console.timeEnd(title);
 }
 
+async function commandRemove(_, command) {
+  return timeCommand("remove", async () => {
+    const { pathStore } = await getStore();
+    const args = command.args || [];
+
+    const checkPath = async (_pathFile) => {
+      const pathFile = _pathFile.replace(pathStore, "");
+
+      if (pathFile.length) {
+        const hashFile = objectHash(pathFile);
+
+        if (args.includes(hashFile)) {
+          await removePath(_pathFile);
+        }
+      }
+    };
+
+    await eachFile(pathStore, checkPath, checkPath);
+  });
+}
+
 async function commandShow() {
   const title = "✨ toggler-fs show done";
 
@@ -117,14 +140,13 @@ async function commandClear() {
 
 async function commandList() {
   return timeCommand("list", async () => {
-    const pathStore = getPathStore();
+    const { pathStore } = await getStore();
 
     const logPath = ({ pre = "", post = "" }) => (_pathFile) => {
       const pathFile = _pathFile.replace(pathStore, "");
 
       if (pathFile.length) {
         const hashFile = objectHash(pathFile);
-
         console.log(`${pre}${hashFile.cyan} ${pathFile}${post}`);
       }
     };
@@ -134,9 +156,12 @@ async function commandList() {
 }
 
 // Addded methods
-function getPathStore() {
+function getKeyStore() {
+  return objectHash(process.cwd());
+}
+
+function getPathStore(keyStore = getKeyStore()) {
   const pathRootStore = path.resolve(__dirname, "../.store");
-  const keyStore = objectHash(process.cwd());
 
   return path.resolve(pathRootStore, keyStore);
 }
@@ -280,5 +305,19 @@ async function time(key, cb) {
 async function timeCommand(command, cb) {
   const key = `✨ ${name} ${command} done`;
 
-  return time(key, cb);
+  try {
+    return await time(key, cb);
+  } catch (error) {
+    console.log(error);
+    console.log(`❌ ${name} ${command} fail`);
+  }
+}
+
+async function getStore(options = {}) {
+  const { keyStore } = options;
+  const pathStore = getPathStore(keyStore);
+
+  await nodePromise(fs.access, pathStore);
+
+  return { keyStore, pathStore };
 }
