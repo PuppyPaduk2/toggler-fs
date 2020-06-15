@@ -5,6 +5,8 @@ const path = require("path");
 const fs = require("fs");
 const objectHash = require("object-hash");
 const { timeCommand } = require("./lib/time");
+const { nodePromise } = require("./lib/node-promise");
+const { getPathStore, getStore } = require("./lib/store");
 
 require("colors");
 
@@ -121,16 +123,6 @@ async function commandList() {
 }
 
 // Addded methods
-function getKeyStore() {
-  return objectHash(process.cwd());
-}
-
-function getPathStore(keyStore = getKeyStore()) {
-  const pathRootStore = path.resolve(__dirname, "../.store");
-
-  return path.resolve(pathRootStore, keyStore);
-}
-
 async function lstat(path) {
   return nodePromise(fs.lstat, path);
 }
@@ -238,30 +230,8 @@ async function removeFile(path) {
   return nodePromise(fs.unlink, path);
 }
 
-function nodePromise(callback, ...args) {
-  return new Promise((resolve, reject) => {
-    callback(...args, (error, result) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      resolve(result);
-    });
-  });
-}
-
 async function asyncForEach(arr, callback) {
   for (let index = 0; index < arr.length; index += 1) {
     await callback(arr[index], index, arr);
   }
-}
-
-async function getStore(options = {}) {
-  const { keyStore } = options;
-  const pathStore = getPathStore(keyStore);
-
-  await nodePromise(fs.access, pathStore);
-
-  return { keyStore, pathStore };
 }
