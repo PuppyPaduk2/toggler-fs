@@ -1,8 +1,8 @@
 # Toggler-fs
 
-## Next
+## Next 0.1.0
 
 - [] nodePromise, in second parameter replase on array
-- [] move command in folder
-- [] move added method in folder
+- [x] move command in folder
+- [x] move added method in folder
 - [x] timeCommand move to root command
