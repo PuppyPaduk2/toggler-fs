@@ -4,10 +4,10 @@ const { nodePromise } = require("./node-promise");
 const { asyncForEach } = require("./async-for-each");
 
 async function hidePath(pathFrom, pathTo, hideFolder = false) {
-  const fromStat = await nodePromise(fs.stat, pathFrom);
+  const fromStat = await nodePromise(fs.stat, [pathFrom]);
 
   if (fromStat.isDirectory()) {
-    const dirPaths = await nodePromise(fs.readdir, pathFrom);
+    const dirPaths = await nodePromise(fs.readdir, [pathFrom]);
 
     await asyncForEach(dirPaths, async (item) => {
       await hidePath(
@@ -19,8 +19,8 @@ async function hidePath(pathFrom, pathTo, hideFolder = false) {
 
     if (hideFolder) {
       try {
-        await nodePromise(fs.access, pathTo);
-        await nodePromise(fs.rmdir, pathTo);
+        await nodePromise(fs.access, [pathTo]);
+        await nodePromise(fs.rmdir, [pathTo]);
       } catch (error) {
         // pass
       }
@@ -30,8 +30,8 @@ async function hidePath(pathFrom, pathTo, hideFolder = false) {
   }
 
   try {
-    await nodePromise(fs.access, pathTo);
-    await nodePromise(fs.unlink, pathTo);
+    await nodePromise(fs.access, [pathTo]);
+    await nodePromise(fs.unlink, [pathTo]);
   } catch (error) {
     // pass
   }

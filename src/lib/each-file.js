@@ -8,10 +8,10 @@ async function eachFile(
   callbackFile = () => {},
   callbackDir = () => {},
 ) {
-  const fromStat = await nodePromise(fs.stat, pathValue);
+  const fromStat = await nodePromise(fs.stat, [pathValue]);
 
   if (fromStat.isDirectory()) {
-    const dirPaths = await nodePromise(fs.readdir, pathValue);
+    const dirPaths = await nodePromise(fs.readdir, [pathValue]);
 
     callbackDir(pathValue);
 

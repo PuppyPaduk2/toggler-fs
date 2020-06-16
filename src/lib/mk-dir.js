@@ -3,9 +3,9 @@ const fs = require("fs");
 
 async function mkDir(path) {
   try {
-    await nodePromise(fs.access, path);
+    await nodePromise(fs.access, [path]);
   } catch (error) {
-    nodePromise(fs.mkdir, path, { recursive: true });
+    nodePromise(fs.mkdir, [path, { recursive: true }]);
   }
 }
 

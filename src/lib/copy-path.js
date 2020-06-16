@@ -7,14 +7,14 @@ const { asyncForEach } = require("./async-for-each");
 async function copyFile(pathFrom, pathTo) {
   await mkDir(path.dirname(pathTo));
 
-  return nodePromise(fs.copyFile, pathFrom, pathTo);
+  return nodePromise(fs.copyFile, [pathFrom, pathTo]);
 }
 
 async function copyPath(pathFrom, pathTo) {
-  const fromStat = await nodePromise(fs.stat, pathFrom);
+  const fromStat = await nodePromise(fs.stat, [pathFrom]);
 
   if (fromStat.isDirectory()) {
-    const dirPaths = await nodePromise(fs.readdir, pathFrom);
+    const dirPaths = await nodePromise(fs.readdir, [pathFrom]);
 
     await asyncForEach(dirPaths, async (item) => {
       await copyPath(path.resolve(pathFrom, item), path.resolve(pathTo, item));

@@ -22,7 +22,7 @@ async function commandAdd(params = {}) {
     console.log(`to: ${pathFileTo}`);
 
     try {
-      const fromStat = await nodePromise(fs.stat, pathFileFrom);
+      const fromStat = await nodePromise(fs.stat, [pathFileFrom]);
       const copyObjectName = fromStat.isDirectory() ? "directory" : "file";
 
       await copyPath(pathFileFrom, pathFileTo);

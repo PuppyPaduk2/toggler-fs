@@ -1,4 +1,4 @@
-function nodePromise(callback, ...args) {
+function nodePromise(callback, args = []) {
   return new Promise((resolve, reject) => {
     callback(...args, (error, result) => {
       if (error) {

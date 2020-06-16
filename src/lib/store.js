@@ -7,7 +7,7 @@ async function getStore(options = {}) {
   const { keyStore } = options;
   const pathStore = getPathStore(keyStore);
 
-  await nodePromise(fs.access, pathStore);
+  await nodePromise(fs.access, [pathStore]);
 
   return { keyStore, pathStore };
 }
