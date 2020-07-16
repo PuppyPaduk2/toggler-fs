@@ -1,12 +1,15 @@
 {
   "name": "toggler-fs",
   "version": "0.0.0",
+  "repository": "git@github.com:EvgenyiFedotov/toggler-fs.git",
+  "author": "e.fedotov <fedotov1290@gmail.com>",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
     "toggler-fs": "./src/cli.js"
   },
   "dependencies": {
+    "colors": "^1.4.0",
     "commander": "^5.1.0",
     "object-hash": "^2.0.3"
   },
